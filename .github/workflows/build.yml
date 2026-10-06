@@ -26,6 +26,6 @@ jobs:
           name: ESN-SpeedForce-Install
           path: |
             target/ESN-SpeedForce-1.1.0.jar
-            dist/ESN-SpeedForce-ResourcePack-1.0.0.zip
+            dist/ESN-SpeedForce-ResourcePack-1.1.0.zip
           if-no-files-found: error
           retention-days: 90
