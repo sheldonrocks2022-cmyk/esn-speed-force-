@@ -11,7 +11,7 @@ import org.bukkit.util.Vector;
 public final class SpeedForceListener implements Listener {
     private final SpeedForcePlugin plugin;
     SpeedForceListener(SpeedForcePlugin plugin){this.plugin=plugin;}
-    @EventHandler public void onQuit(PlayerQuitEvent event){plugin.powers().quit(event.getPlayer());}
+    @EventHandler public void onQuit(PlayerQuitEvent event){plugin.powers().quit(event.getPlayer());plugin.progression().quit(event.getPlayer());}
     @EventHandler public void onUse(PlayerInteractEvent event){
         if(event.getHand()!=EquipmentSlot.HAND)return;
         switch(event.getAction()){

@@ -18,6 +18,13 @@ public final class Commands implements CommandExecutor, TabCompleter {
         send(s,"&7/sf ability <dash|lightning|whirlwind|heal|time|afterimage>");
         send(s,"&7/sf toggle &f- Turn your powers on/off");
         send(s,"&7/sf recipes &f- Crafting information");
+        send(s,"&7/sf upgrades &f- Permanent skill upgrades GUI");
+        send(s,"&7/sf upgrade <speed|energy|regen|mastery> &f- Buy upgrade");
+        send(s,"&7/sf profile &f- View level, XP and shards");
+        send(s,"&7/sf realm &f- Enter the Speed Force realm");
+        send(s,"&7/sf trial &f- Start a 90-second circuit race");
+        send(s,"&7/sf boss &f- Awaken the arena boss");
+        send(s,"&7/sf leave &f- Return to the previous world");
         if(s.hasPermission("speedforce.admin")){
             send(s,"&eAdmin: /sf give <player> <item_id> [amount]");
             send(s,"&eAdmin: /sf kit <player> <suit>, /sf reload, /sf list");
@@ -74,10 +81,20 @@ public final class Commands implements CommandExecutor, TabCompleter {
         if(!(sender instanceof Player p)){help(sender);return true;}
         if(!p.hasPermission("speedforce.use")){send(p,"&cNo access.");return true;}
         switch(sub){
+            case "upgrades"->plugin.menus().upgrades(p);
+            case "upgrade"->{
+                if(args.length<2)send(p,"&cUse /sf upgrade <speed|energy|regen|mastery>");
+                else plugin.progression().upgrade(p,args[1]);
+            }
+            case "profile"->plugin.progression().report(p);
+            case "realm"->plugin.realm().enter(p);
+            case "leave"->plugin.realm().leave(p);
+            case "trial"->plugin.realm().startTrial(p);
+            case "boss"->plugin.realm().spawnBoss(p);
             case "status"->{
                 Suit suit=plugin.gear().fullSuit(p);
                 send(p,"&6SpeedForce &7| Suit: &f"+(suit==null?"none":suit.name));
-                send(p,"&7Energy: &e"+plugin.powers().energy(p)+"&7/&e"+plugin.powers().maxEnergy());
+                send(p,"&7Energy: &e"+plugin.powers().energy(p)+"&7/&e"+plugin.powers().maxEnergy(p));
                 send(p,"&7Active: &f"+plugin.powers().active(p)+" &7Dampened: &f"+plugin.powers().suppressed(p));
             }
             case "ability"->{
@@ -102,7 +119,8 @@ public final class Commands implements CommandExecutor, TabCompleter {
         return true;
     }
     @Override public List<String> onTabComplete(CommandSender s,Command c,String alias,String[] args){
-        if(args.length==1)return filter(List.of("menu","status","ability","equip","toggle","recipes","help","give","kit","list","reload"),args[0]);
+        if(args.length==1)return filter(List.of("menu","status","ability","equip","toggle","recipes","help","give","kit","list","reload","upgrades","upgrade","profile","realm","leave","trial","boss"),args[0]);
+        if(args.length==2 && args[0].equalsIgnoreCase("upgrade"))return filter(Progression.STATS,args[1]);
         if(args.length==2 && args[0].equalsIgnoreCase("ability"))return filter(List.of("dash","lightning","whirlwind","heal","time","afterimage"),args[1]);
         if(args.length==2 && args[0].equalsIgnoreCase("equip"))return filter(Arrays.stream(Suit.values()).map(x->x.id).toList(),args[1]);
         if(args.length==2 && (args[0].equalsIgnoreCase("give")||args[0].equalsIgnoreCase("kit")) && s.hasPermission("speedforce.admin"))return filter(Bukkit.getOnlinePlayers().stream().map(Player::getName).toList(),args[1]);

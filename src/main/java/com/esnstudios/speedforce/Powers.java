@@ -20,7 +20,8 @@ public final class Powers {
     private long tick=0;
     Powers(SpeedForcePlugin plugin){this.plugin=plugin;}
     public int maxEnergy(){return plugin.getConfig().getInt("energy-max",100);}
-    public int energy(Player p){return (int)Math.round(energy.getOrDefault(p.getUniqueId(),(double)maxEnergy()));}
+    public int maxEnergy(Player p){return maxEnergy()+25*plugin.progression().rank(p,"energy");}
+    public int energy(Player p){return (int)Math.round(energy.getOrDefault(p.getUniqueId(),(double)maxEnergy(p)));}
     public boolean isEnabled(Player p){return !toggledOff.contains(p.getUniqueId()) && !suppressed(p);}
     public boolean suppressed(Player p){return System.currentTimeMillis()<suppressed.getOrDefault(p.getUniqueId(),0L);}
     public boolean toggle(Player p){
@@ -56,22 +57,25 @@ public final class Powers {
     public void tick(){
         tick+=2;
         for(Player p:Bukkit.getOnlinePlayers()){
+            plugin.progression().runTick(p);
             if(!active(p)){restoreSpeed(p);continue;}
             Suit s=plugin.gear().fullSuit(p);
             UUID id=p.getUniqueId();
-            double e=energy.getOrDefault(id,(double)maxEnergy());
+            double e=energy.getOrDefault(id,(double)maxEnergy(p));
             boolean sprint=p.isSprinting() && p.isOnGround();
             double drain=plugin.getConfig().getDouble("energy-sprint-cost-per-tick",0.16)*2;
-            double regen=plugin.getConfig().getDouble("energy-regen-per-tick",0.65)*2;
-            e=Math.max(0,Math.min(maxEnergy(),e+(sprint?-drain:regen)));
+            double regen=(plugin.getConfig().getDouble("energy-regen-per-tick",0.65)+0.09*plugin.progression().rank(p,"regen"))*2;
+            e=Math.max(0,Math.min(maxEnergy(p),e+(sprint?-drain:regen)));
             energy.put(id,e);
             originalWalk.putIfAbsent(id,p.getWalkSpeed());
-            float target=(e>1 && p.isSprinting())?s.walkSpeed:0.2f;
-            if(System.currentTimeMillis()<boosted.getOrDefault(id,0L))target=Math.min(0.65f,target+0.08f);
-            target=Math.min(target,(float)plugin.getConfig().getDouble("max-walk-speed",0.58));
-            target=Math.max(0.2f,target);
+            float base=originalWalk.getOrDefault(id,0.2f);
+            float target=(e>1 && p.isSprinting())?(s.walkSpeed+0.015f*plugin.progression().rank(p,"speed")):base;
+            if(System.currentTimeMillis()<boosted.getOrDefault(id,0L))target=Math.min(0.95f,target+0.08f);
+            target=Math.min(target,(float)plugin.getConfig().getDouble("max-walk-speed",0.85));
+            target=Math.max(0.0f,target);
             float now=p.getWalkSpeed();
-            float next=now+(target>now?Math.min(0.018f,target-now):Math.max(-0.025f,target-now));
+            float acceleration=0.018f+0.001f*plugin.progression().rank(p,"speed");
+            float next=now+(target>now?Math.min(acceleration,target-now):Math.max(-0.025f,target-now));
             if(Math.abs(next-now)>0.001f)p.setWalkSpeed(next);
             if(p.isSprinting() && e>0 && plugin.getConfig().getBoolean("trails",true) && tick%6==0){
                 Location l=p.getLocation().add(0,0.3,0);
@@ -83,7 +87,7 @@ public final class Powers {
                 if(v.getY()<0.04)p.setVelocity(v.setY(0.08));
                 p.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE,14,1,true,false));
             }
-            if(tick%20==0)p.sendActionBar(Component.text("⚡ "+s.name+"   "+(int)e+"/"+maxEnergy()+" Energy"));
+            if(tick%20==0)p.sendActionBar(Component.text("⚡ "+s.name+"   "+(int)e+"/"+maxEnergy(p)+" Energy"));
         }
     }
     private boolean spend(Player p,String ability,int points){
@@ -93,9 +97,10 @@ public final class Powers {
         long next=cd.getOrDefault(ability,0L);
         if(next>now){p.sendMessage(ChatColor.RED+"Cooldown: "+((next-now+999)/1000)+"s");return false;}
         int available=energy(p);
+        points=Math.max(4,points-2*plugin.progression().rank(p,"mastery"));
         if(available<points){p.sendMessage(ChatColor.RED+"Need "+points+" energy. You have "+available+".");return false;}
         energy.put(p.getUniqueId(),Math.max(0,available-points)*1.0);
-        int seconds=Math.max(1,plugin.getConfig().getInt("cooldowns."+ability,8));
+        int seconds=Math.max(2,(int)Math.ceil(plugin.getConfig().getInt("cooldowns."+ability,8)*(1.0-0.055*plugin.progression().rank(p,"mastery"))));
         cd.put(ability,now+seconds*1000L);
         return true;
     }
@@ -156,7 +161,7 @@ public final class Powers {
         return true;
     }
     public void addEnergy(Player p,int amount){
-        energy.put(p.getUniqueId(),Math.min(maxEnergy(),energy(p)+amount)*1.0);
+        energy.put(p.getUniqueId(),Math.min(maxEnergy(p),energy(p)+amount)*1.0);
     }
     public void boost(Player p,int seconds){boosted.put(p.getUniqueId(),System.currentTimeMillis()+seconds*1000L);}
 }

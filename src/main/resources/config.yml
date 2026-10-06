@@ -2,7 +2,7 @@
 energy-max: 100
 energy-regen-per-tick: 0.65
 energy-sprint-cost-per-tick: 0.16
-max-walk-speed: 0.58
+max-walk-speed: 0.85
 wall-running: false # Experimental: movement anti-cheat may flag wall boosts
 water-running: true
 trails: true
@@ -15,3 +15,7 @@ cooldowns:
   heal: 18
   time: 24
   afterimage: 12
+
+# Created once; never alter an unrelated existing world with this name.
+realm:
+  world-name: esn_speedforce_realm
