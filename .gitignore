@@ -1,0 +1,6 @@
+target/
+dist/
+*.log
+.idea/
+*.iml
+__pycache__/

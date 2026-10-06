@@ -1,0 +1,31 @@
+name: Build SpeedForce
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compile-and-pack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Build plugin
+        run: mvn --batch-mode --no-transfer-progress clean package
+      - name: Generate custom model resource pack
+        run: |
+          python3 tools/make_pack.py
+          unzip -t dist/ESN-SpeedForce-ResourcePack-1.0.0.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ESN-SpeedForce-Install
+          path: |
+            target/ESN-SpeedForce-1.0.0.jar
+            dist/ESN-SpeedForce-ResourcePack-1.0.0.zip
+          if-no-files-found: error
+          retention-days: 90

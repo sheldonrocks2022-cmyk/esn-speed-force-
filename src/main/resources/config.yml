@@ -1,0 +1,17 @@
+# ESN SpeedForce - restart or /speedforce reload
+energy-max: 100
+energy-regen-per-tick: 0.65
+energy-sprint-cost-per-tick: 0.16
+max-walk-speed: 0.58
+wall-running: false # Experimental: movement anti-cheat may flag wall boosts
+water-running: true
+trails: true
+world-blacklist: []
+# Cooldown seconds for abilities
+cooldowns:
+  dash: 6
+  lightning: 9
+  whirlwind: 14
+  heal: 18
+  time: 24
+  afterimage: 12
