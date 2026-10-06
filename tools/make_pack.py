@@ -3,7 +3,7 @@
 import json, struct, zlib, zipfile, pathlib
 ROOT=pathlib.Path("dist")
 ROOT.mkdir(exist_ok=True)
-DEST=ROOT/"ESN-SpeedForce-ResourcePack-1.0.0.zip"
+DEST=ROOT/"ESN-SpeedForce-ResourcePack-1.1.0.zip"
 SUITS={
     "flash":((218,34,37),(255,209,66)),
     "reverse":((238,210,41),(183,31,30)),
@@ -20,6 +20,9 @@ UTILITY={
     "lightning_shard":((69,196,245),(254,246,116)),
     "dampener":((76,35,97),(212,89,235)),
     "meta_cuffs":((112,115,122),(222,227,230)),
+    "rift_compass":((111,46,219),(181,255,255)),
+    "chrono_shard":((31,149,210),(248,233,119)),
+    "trial_medal":((235,165,40),(255,251,216)),
 }
 def png(pixels):
     h=len(pixels); w=len(pixels[0])
@@ -64,7 +67,7 @@ def armor(base,accent,leggings=False):
 def dumps(obj):return json.dumps(obj,separators=(",",":"),ensure_ascii=False).encode()
 with zipfile.ZipFile(DEST,"w",compression=zipfile.ZIP_DEFLATED,compresslevel=9) as pack:
     def add(path,payload):pack.writestr(path,payload)
-    add("pack.mcmeta",dumps({"pack":{"pack_format":46,"description":"ESN SpeedForce 1.0 - super suits, rings, and custom items (1.21.4)"}}))
+    add("pack.mcmeta",dumps({"pack":{"pack_format":46,"description":"ESN SpeedForce 1.1 - super suits, rings, and custom items (1.21.4)"}}))
     add("PACK-INSTRUCTIONS.txt",b"Enable this resource pack on Java Edition 1.21.4. Upload it as the server resource pack or use Options > Resource Packs. Bedrock clients require a separate Geyser-converted Bedrock pack.\n")
     def item(id,kind,colors):
         ns="assets/esn_speedforce/"

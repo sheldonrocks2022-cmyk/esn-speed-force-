@@ -186,6 +186,8 @@ public final class Realm implements Listener {
                     int elapsed=(int)((now-t.start)/1000);
                     int bonus=Math.max(0,(90-elapsed)/3);
                     plugin.progression().grant(p,80+bonus,22+bonus);
+                    Map<Integer,ItemStack> bonusLoot=p.getInventory().addItem(plugin.gear().make("trial_medal"));
+                    for(ItemStack excess:bonusLoot.values())p.getWorld().dropItemNaturally(p.getLocation(),excess);
                     trialCooldowns.put(p.getUniqueId(),now+180_000L);
                     p.sendMessage(ChatColor.GOLD+"⚡ TRIAL COMPLETE in "+elapsed+"s! Earned XP and Velocity Shards.");
                     it.remove();continue;
@@ -210,7 +212,9 @@ public final class Realm implements Listener {
             if(p.getLocation().distanceSquared(e.getEntity().getLocation())<=40*40 && plugin.gear().fullSuit(p)!=null){
                 plugin.progression().grant(p,125,40);
                 p.getInventory().addItem(plugin.gear().make("lightning_shard"));
-                p.sendMessage(ChatColor.GOLD+"⚡ Wraith defeated! +125 XP, +40 shards, 1 Lightning Shard.");
+                Map<Integer,ItemStack> reward=p.getInventory().addItem(plugin.gear().make("chrono_shard"));
+                for(ItemStack extra:reward.values())p.getWorld().dropItemNaturally(p.getLocation(),extra);
+                p.sendMessage(ChatColor.GOLD+"⚡ Wraith defeated! +125 XP, +40 shards, Lightning Shard and Temporal Crystal.");
             }
         }
         if(bossBar!=null){bossBar.removeAll();bossBar=null;}

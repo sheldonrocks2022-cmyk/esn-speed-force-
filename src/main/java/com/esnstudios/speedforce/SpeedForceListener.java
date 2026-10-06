@@ -5,6 +5,7 @@ import org.bukkit.entity.*;
 import org.bukkit.event.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
+import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.*;
 import org.bukkit.util.Vector;
 
@@ -28,6 +29,25 @@ public final class SpeedForceListener implements Listener {
             return;
         }
         switch(id){
+            case "rift_compass"->{
+                event.setCancelled(true);
+                plugin.realm().enter(p);
+            }
+            case "chrono_shard"->{
+                event.setCancelled(true);
+                plugin.progression().grant(p,100,25);
+                p.sendMessage(ChatColor.GOLD+"⚡ Temporal Crystal consumed: +100 XP and +25 Velocity Shards.");
+                consume(p);
+            }
+            case "meta_cuffs"->{
+                event.setCancelled(true);
+                int hit=0;
+                for(Entity e:p.getNearbyEntities(4,4,4))if(e instanceof Player other && other!=p && p.getWorld().getPVP()){
+                    plugin.powers().suppress(other,9);other.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.SLOWNESS,100,2));hit++;
+                }
+                if(hit>0){consume(p);p.sendMessage(ChatColor.GRAY+"Meta Cuffs restrained "+hit+" targets.");}
+                else p.sendMessage(ChatColor.RED+"No enemy speedsters in range.");
+            }
             case "tachyon"->{
                 event.setCancelled(true);
                 if(plugin.powers().active(p)){
@@ -64,6 +84,21 @@ public final class SpeedForceListener implements Listener {
         ItemStack item=p.getInventory().getItemInMainHand();
         if(item.getAmount()<=1)p.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
         else item.setAmount(item.getAmount()-1);
+    }
+    @EventHandler(ignoreCancelled=true) public void onSuitArmorMove(InventoryClickEvent event){
+        if(plugin.gear().isSummoned(event.getCurrentItem()) || plugin.gear().isSummoned(event.getCursor()))event.setCancelled(true);
+        if(event.getClick()==ClickType.NUMBER_KEY && event.getWhoClicked() instanceof Player p){
+            if(plugin.gear().isSummoned(p.getInventory().getItem(event.getHotbarButton())))event.setCancelled(true);
+        }
+    }
+    @EventHandler(ignoreCancelled=true) public void onSuitDrag(InventoryDragEvent event){
+        if(plugin.gear().isSummoned(event.getOldCursor()))event.setCancelled(true);
+    }
+    @EventHandler(ignoreCancelled=true) public void onSuitDrop(PlayerDropItemEvent event){
+        if(plugin.gear().isSummoned(event.getItemDrop().getItemStack()))event.setCancelled(true);
+    }
+    @EventHandler public void onDeath(PlayerDeathEvent event){
+        event.getDrops().removeIf(plugin.gear()::isSummoned);
     }
     @EventHandler(ignoreCancelled=true)public void onCombat(EntityDamageByEntityEvent event){
         if(!(event.getDamager() instanceof Player p) || !plugin.powers().active(p))return;

@@ -1,4 +1,4 @@
-# ⚡ ESN SpeedForce — 1.0.0
+# ⚡ ESN SpeedForce — 1.1.0
 
 **ESN Studios' Paper/Purpur speedster gameplay plugin** with actual custom items, six speedster armor sets, matching summon rings, playable powers, a GUI, crafting recipes, and a generated Java resource pack.
 
@@ -26,8 +26,8 @@ Unique utility items: **Speed Force Core, Tachyon Enhancer, Velocity Serum, Ligh
 1. Open [Actions](../../actions/workflows/build.yml).
 2. Open the latest **green** “Build SpeedForce” run.
 3. Download **ESN-SpeedForce-Install** from **Artifacts**. Extract the artifact ZIP.
-4. Put `ESN-SpeedForce-1.0.0.jar` in the Minecraft server's `plugins/` folder.
-5. Restart **Paper/Purpur**. Install the accompanying `ESN-SpeedForce-ResourcePack-1.0.0.zip` on the *Java* client via Options → Resource Packs, or host it as your server's resource pack.
+4. Put `ESN-SpeedForce-1.1.0.jar` in the Minecraft server's `plugins/` folder.
+5. Restart **Paper/Purpur**. Install the accompanying `ESN-SpeedForce-ResourcePack-1.1.0.zip` on the *Java* client via Options → Resource Packs, or host it as your server's resource pack.
 
 **Do not extract the resource-pack ZIP** when installing it on the client. For Java players on a server, configure `resource-pack`, `resource-pack-sha1` and optionally `require-resource-pack` in server.properties using a public direct-download URL (not a GitHub Actions login-only artifact link).
 
@@ -85,3 +85,20 @@ python3 tools/make_pack.py
 ```
 
 The Java JAR appears in `target/`. The custom item/equipment pack appears in `dist/`. The GitHub Actions workflow builds and checks both outputs automatically.
+
+## v1.1 Permanent upgrades and Realm
+
+Progression saves as player Persistent Data Container values and persists across reconnects/restarts.
+
+- Sprinting in a complete suit earns 3 XP and 1 Velocity Shard per real 30 blocks traveled (2 shards in realm). Levels grant 5 bonus shards, cap level 100.
+- `/sf upgrades` opens a GUI for permanent **Speed** (+0.015/tier, max 15), **Energy** (+25/tier, max 20), **Regeneration** (+0.09/tick per tier, max 12), and **Mastery** (cheaper skills/cooldowns, max 10). Cost starts at 12 shards and rises by 8/tier.
+- `/sf upgrade speed` buys a rank; `/sf profile` shows stats.
+- `/sf realm` enters a unique new superflat world with **generated lightning-inspired lobby, circuit, crystals, and arena**. It is created on first use, not on server startup; the system refuses to overwrite an existing unrelated world folder.
+- `/sf trial` starts the 5-checkpoint, 90-second speedster circuit; grants XP, Shards and a custom Time Trial Medal. Three-minute trial cooldown.
+- `/sf boss` near the east arena summons a 240-HP Temporal Wraith; a twelve-minute summon cooldown and boss bar apply. Nearby suited participants earn 125 XP, 40 Shards, Lightning Shard and Temporal Crystal.
+- `/sf leave` returns to the last saved location in the original world.
+- **Rift Compass** is craftable (Amethyst Shards top/bottom, Ender Pearls left/right, custom Speed Force Core center). Right-click to open the realm. **Temporal Crystal** redeems for 100 XP/25 shards; **Meta Cuffs** suppress hostile speedsters; the medal is a collectible. These 3 items have custom Java textures in the 1.1 resource pack.
+
+**Upgrading:** Stop the server; remove the old `ESN-SpeedForce-1.0.0.jar` before adding the 1.1 JAR. Keep `plugins/ESNSpeedForce/config.yml` and your worlds. New config defaults may need to be added manually to old configs: `max-walk-speed: 0.85` if you want speed ranks above the old hard cap of 0.58. Add `realm: { world-name: esn_speedforce_realm }` or let the fallback name apply. Replace the old Java pack ZIP with the new one. World and player progression data are not erased by a JAR replacement. Test on a staging server and take a world backup.
+
+**Compatibility:** This is a Paper plugin-created *separate world*, not a custom-dimension client mod. The included texture pack is Java-only; Geyser Bedrock users need their own Bedrock pack/mappings for custom suit appearances. Do not promise seamless Bedrock item visuals before testing.

@@ -49,6 +49,9 @@ public final class Menus implements Listener {
         }
         String[] ids={"core","tachyon","serum","lightning_shard","dampener","meta_cuffs"};
         for(int i=0;i<ids.length;i++)inv.setItem(28+i,plugin.gear().make(ids[i]));
+        inv.setItem(34,plugin.gear().make("rift_compass"));
+        inv.setItem(35,plugin.gear().make("chrono_shard"));
+        inv.setItem(43,plugin.gear().make("trial_medal"));
         inv.setItem(36,button(Material.ENCHANTING_TABLE,"&dPermanent Upgrades","&7Spend Velocity Shards on skills"));
         inv.setItem(37,button(Material.END_PORTAL_FRAME,"&5Speed Force Realm","&7Teleport to a new speedster dimension"));
         inv.setItem(38,button(Material.CLOCK,"&bRacing Time Trial","&7Only available inside the realm"));
@@ -112,8 +115,8 @@ public final class Menus implements Listener {
         }else if(slot==40){
             p.closeInventory();
             p.sendMessage(ChatColor.YELLOW+"Powers "+(plugin.powers().toggle(p)?"enabled":"disabled"));
-        }else if(slot>=28 && slot<=33){
-            String item=Gear.UTILITIES.get(slot-28);
+        }else if((slot>=28 && slot<=35)||slot==43){
+            String item=slot==43?"trial_medal":Gear.UTILITIES.get(slot-28);
             if(p.hasPermission("speedforce.admin") && event.isShiftClick()){
                 p.getInventory().addItem(plugin.gear().make(item));p.sendMessage(ChatColor.GREEN+"Granted "+item+".");
             }else p.sendMessage(ChatColor.GRAY+item+" — admin grant: /sf give <player> "+item);

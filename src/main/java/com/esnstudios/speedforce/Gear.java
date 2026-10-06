@@ -13,7 +13,7 @@ public final class Gear {
     private final NamespacedKey gearKey;
     public static final String[] PARTS={"helmet","chestplate","leggings","boots"};
     private static final Material[] MATERIALS={Material.LEATHER_HELMET,Material.LEATHER_CHESTPLATE,Material.LEATHER_LEGGINGS,Material.LEATHER_BOOTS};
-    public static final List<String> UTILITIES=List.of("core","tachyon","serum","lightning_shard","dampener","meta_cuffs");
+    public static final List<String> UTILITIES=List.of("core","tachyon","serum","lightning_shard","dampener","meta_cuffs","rift_compass","chrono_shard","trial_medal");
     Gear(SpeedForcePlugin plugin) { this.plugin=plugin; gearKey=new NamespacedKey(plugin,"gear_id"); }
     public String id(ItemStack item) {
         if(item == null || !item.hasItemMeta()) return null;
@@ -38,6 +38,9 @@ public final class Gear {
             case "lightning_shard" -> create(Material.AMETHYST_SHARD,id,ChatColor.AQUA+"Lightning Shard",Color.AQUA,false,ChatColor.GRAY+"Right-click to cast an electrical shock");
             case "dampener" -> create(Material.ECHO_SHARD,id,ChatColor.DARK_PURPLE+"Speed Dampener",Color.PURPLE,false,ChatColor.GRAY+"Disrupts nearby speedsters for 6 seconds");
             case "meta_cuffs" -> create(Material.IRON_NUGGET,id,ChatColor.GRAY+"Meta Cuffs",Color.GRAY,false,ChatColor.GRAY+"A collectible upgrade component");
+            case "rift_compass" -> create(Material.COMPASS,id,ChatColor.LIGHT_PURPLE+"Speed Force Rift Compass",Color.PURPLE,false,ChatColor.GRAY+"Right-click to teleport into the Speed Force Realm");
+            case "chrono_shard" -> create(Material.PRISMARINE_CRYSTALS,id,ChatColor.AQUA+"Temporal Wraith Crystal",Color.AQUA,false,ChatColor.GRAY+"Right-click: redeem for XP and Velocity Shards");
+            case "trial_medal" -> create(Material.NETHERITE_SCRAP,id,ChatColor.GOLD+"Time Trial Medal",Color.YELLOW,false,ChatColor.GRAY+"Proof of your victory in the Speed Force Realm");
             default -> null;
         };
     }
@@ -75,7 +78,7 @@ public final class Gear {
         if(v!=null && v.startsWith("ring_") && Suit.of(v.substring(5))!=null) return v.substring(5);
         return null;
     }
-    private boolean isSummoned(ItemStack item) {
+    public boolean isSummoned(ItemStack item) {
         if(!isSuitPiece(item))return false;
         return item.getItemMeta().getPersistentDataContainer().has(new NamespacedKey(plugin,"summoned"),PersistentDataType.BYTE);
     }
@@ -116,6 +119,12 @@ public final class Gear {
         return true;
     }
     public void registerRecipes() {
+        ShapedRecipe compass=new ShapedRecipe(new NamespacedKey(plugin,"rift_compass"),make("rift_compass"));
+        compass.shape(" A ","ECE"," A ");
+        compass.setIngredient('A',Material.AMETHYST_SHARD);
+        compass.setIngredient('E',Material.ENDER_PEARL);
+        compass.setIngredient('C',new RecipeChoice.ExactChoice(make("core")));
+        Bukkit.addRecipe(compass);
         ShapedRecipe core=new ShapedRecipe(new NamespacedKey(plugin,"speedforce_core"),make("core"));
         core.shape("ERE","RNR","ERE");
         core.setIngredient('E',Material.ECHO_SHARD);core.setIngredient('R',Material.REDSTONE_BLOCK);core.setIngredient('N',Material.NETHER_STAR);
