@@ -12,7 +12,7 @@ public final class SpeedForceListener implements Listener {
     private final SpeedForcePlugin plugin;
     SpeedForceListener(SpeedForcePlugin plugin){this.plugin=plugin;}
     @EventHandler public void onQuit(PlayerQuitEvent event){plugin.powers().quit(event.getPlayer());}
-    @EventHandler(ignoreCancelled=true) public void onUse(PlayerInteractEvent event){
+    @EventHandler public void onUse(PlayerInteractEvent event){
         if(event.getHand()!=EquipmentSlot.HAND)return;
         switch(event.getAction()){
             case RIGHT_CLICK_AIR,RIGHT_CLICK_BLOCK -> {}
