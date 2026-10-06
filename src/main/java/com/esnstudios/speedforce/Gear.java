@@ -75,28 +75,39 @@ public final class Gear {
         if(v!=null && v.startsWith("ring_") && Suit.of(v.substring(5))!=null) return v.substring(5);
         return null;
     }
+    private boolean isSummoned(ItemStack item) {
+        if(!isSuitPiece(item))return false;
+        return item.getItemMeta().getPersistentDataContainer().has(new NamespacedKey(plugin,"summoned"),PersistentDataType.BYTE);
+    }
+    private ItemStack summonPiece(Suit suit,String part) {
+        ItemStack item=make(suit.id+"_"+part);
+        ItemMeta meta=item.getItemMeta();
+        meta.getPersistentDataContainer().set(new NamespacedKey(plugin,"summoned"),PersistentDataType.BYTE,(byte)1);
+        item.setItemMeta(meta);
+        return item;
+    }
     public boolean toggleRing(Player p,Suit suit) {
         ItemStack[] armor=p.getInventory().getArmorContents();
-        boolean owned=false; int slots=0;
-        for(ItemStack piece:armor)if(piece!=null&&piece.getType()!=Material.AIR) {
-            if(isSuitPiece(piece))owned=true; else slots++;
-        }
-        boolean retract=owned && fullSuit(p)==suit;
-        if(retract) {
-            for(int i=0;i<armor.length;i++) if(isSuitPiece(armor[i])) armor[i]=null;
-            p.getInventory().setArmorContents(armor);
+        boolean allSummoned=fullSuit(p)==suit;
+        for(ItemStack piece:armor)if(!isSummoned(piece))allSummoned=false;
+        if(allSummoned){
+            p.getInventory().setArmorContents(new ItemStack[4]);
             p.sendMessage(ChatColor.GRAY+"Your "+suit.name+" suit has been retracted.");
-        } else {
-            // Keep players' existing items: never delete/drop armor to change suits.
-            if(p.getInventory().firstEmpty()==-1 && slots>0) {
-                p.sendMessage(ChatColor.RED+"Need empty inventory slots to safely stow your armor.");return false;
+        }else{
+            // Ring-generated armor can disappear; physical equipment must NEVER be destroyed.
+            int required=0,available=0;
+            for(ItemStack piece:armor)if(piece!=null && piece.getType()!=Material.AIR && !isSummoned(piece))required++;
+            for(ItemStack slot:p.getInventory().getStorageContents())if(slot==null || slot.getType()==Material.AIR)available++;
+            if(available<required){
+                p.sendMessage(ChatColor.RED+"Need "+required+" empty inventory slots to safely stow existing armor.");
+                return false;
             }
-            int empty=0;
-            for(ItemStack entry:p.getInventory().getStorageContents())if(entry==null||entry.getType()==Material.AIR)empty++;
-            if(empty<slots) {p.sendMessage(ChatColor.RED+"Need "+slots+" empty inventory slots.");return false;}
-            for(ItemStack piece:armor)if(piece!=null && piece.getType()!=Material.AIR && !isSuitPiece(piece)) p.getInventory().addItem(piece);
-            armor[3]=make(suit.id+"_helmet");armor[2]=make(suit.id+"_chestplate");
-            armor[1]=make(suit.id+"_leggings");armor[0]=make(suit.id+"_boots");
+            for(ItemStack piece:armor)if(piece!=null && piece.getType()!=Material.AIR && !isSummoned(piece))
+                p.getInventory().addItem(piece.clone());
+            armor[3]=summonPiece(suit,"helmet");
+            armor[2]=summonPiece(suit,"chestplate");
+            armor[1]=summonPiece(suit,"leggings");
+            armor[0]=summonPiece(suit,"boots");
             p.getInventory().setArmorContents(armor);
             p.sendMessage(ChatColor.GOLD+"⚡ "+suit.name+" suit activated!");
         }
