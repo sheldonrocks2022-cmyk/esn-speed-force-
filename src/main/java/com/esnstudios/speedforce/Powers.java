@@ -5,7 +5,8 @@ import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
 import org.bukkit.potion.*;
-import org.bukkit.util.*;
+import org.bukkit.util.RayTraceResult;
+import org.bukkit.util.Vector;
 import java.util.*;
 
 public final class Powers {
